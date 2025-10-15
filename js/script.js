@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalClose = document.getElementById('modalClose');
 
     const themeSwitch = document.getElementById('themeSwitch');
+    const redhookToggle = document.getElementById('redhookToggle');
 
     let nativesMap = {};
     let currentNS = null;
@@ -140,7 +141,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const json = await res.json();
                 nativesMap = buildMap(json);
             }
-            renderNamespaces();
+
+            const showAllCheckbox = document.getElementById('showAllCheckbox');
+            if (showAllCheckbox?.checked) {
+                renderAllNatives();
+                renderSidebarNamespaces();
+            } else {
+                renderNamespaces();
+            }
         } catch (e) {
             namespacesEl.innerHTML = `<div style="color:orange">Error: ${escapeHtml(e.message)}</div>`;
             panelContent.innerHTML = `<div style="color:var(--muted)">Could not load natives file — check your connection or open the raw file directly.</div>`;
@@ -161,12 +169,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderNamespaces() {
         breadcrumb.textContent = 'Namespaces';
         currentNS = null;
-        updatePanelContent(() => '<div class="ns-grid">' + Object.keys(nativesMap).sort().map(ns => {
+
+        const showRedhook = !redhookToggle || redhookToggle.checked;
+        const visibleNamespaces = Object.keys(nativesMap).sort().filter(ns => showRedhook || ns !== 'REDHOOK');
+
+        updatePanelContent(() => '<div class="ns-grid">' + visibleNamespaces.map(ns => {
             const count = nativesMap[ns].length;
             return `<div class="ns-card" data-ns="${ns}" onclick="toggleNamespace('${ns}')"><h3>${escapeHtml(ns)}</h3><p>${count} natives</p></div>`;
         }).join('') + '</div>');
 
-        const nsListHtml = Object.keys(nativesMap).sort().map(ns => {
+        renderSidebarNamespaces(visibleNamespaces);
+    }
+
+    function renderSidebarNamespaces(namespaces = null) {
+        const nsListHtml = (namespaces || Object.keys(nativesMap).sort()).map(ns => {
             const count = nativesMap[ns].length;
             return `<div>
             <div class="ns-item" role="button" data-ns="${ns}">
@@ -217,6 +233,11 @@ document.addEventListener('DOMContentLoaded', () => {
             container.style.maxHeight = '0';
             renderNamespaces();
         }
+    }
+
+    function refreshViews() {
+        const showAllCheckbox = document.getElementById('showAllCheckbox');
+        (showAllCheckbox?.checked) ? renderAllNatives() : globalSearch.dispatchEvent(new Event('input'));
     }
 
     function renderNativesForNamespace(ns) {
@@ -321,27 +342,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.copySig = function (evt, name, params) { evt.stopPropagation(); const sig = name + (params ? `(${params})` : ''); navigator.clipboard?.writeText(sig).then(() => showNotification('Copied: ' + sig, 'success')).catch(() => showNotification('Could not copy', 'error')) }
 
-    // Combined filter logic for main panel
     filterInput.addEventListener('input', () => {
-        // If "Show All" is checked, re-render the global list with the new filter
-        if (document.getElementById('showAllCheckbox')?.checked) {
+        const showAllCheckbox = document.getElementById('showAllCheckbox');
+        if (showAllCheckbox?.checked) {
             renderAllNatives();
         } else if (currentNS) {
-            // Otherwise, if a namespace is selected, re-render its natives
             renderNativesForNamespace(currentNS);
         }
     });
 
     globalSearch.addEventListener('input', () => {
         const q = globalSearch.value.toLowerCase();
-        if (!q) {
-            renderNamespaces();
-            return;
-        }
-        const matches = Object.keys(nativesMap).filter(ns =>
-            ns.toLowerCase().includes(q) ||
-            (nativesMap[ns] || []).some(n => (n.name || '').toLowerCase().includes(q) || (n.hash || '').toLowerCase().includes(q) || (n.comment || '').toLowerCase().includes(q))
-        );
+        const showRedhook = !redhookToggle || redhookToggle.checked;
+
+        const matches = Object.keys(nativesMap)
+            .filter(ns => (showRedhook || ns !== 'REDHOOK')) // Filter REDHOOK namespace if toggle is off
+            .filter(ns => !q || // if query is empty, show all (respecting redhook toggle)
+                ns.toLowerCase().includes(q) ||
+                (nativesMap[ns] || []).some(n => (n.name || '').toLowerCase().includes(q) || (n.hash || '').toLowerCase().includes(q) || (n.comment || '').toLowerCase().includes(q))
+            );
 
         const nsListHtml = matches.map(ns => {
             const count = nativesMap[ns] ? nativesMap[ns].length : 0;
@@ -368,9 +387,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAllNatives() {
         breadcrumb.textContent = 'All natives';
         const q = filterInput.value.toLowerCase();
+        const showRedhook = !redhookToggle || redhookToggle.checked;
 
         const resultsByNs = {};
-        for (const ns of Object.keys(nativesMap).sort()) {
+        const namespacesToSearch = Object.keys(nativesMap).sort().filter(ns => showRedhook || ns !== 'REDHOOK');
+
+        for (const ns of namespacesToSearch) {
             const filteredNatives = nativesMap[ns].filter(n =>
                 !q ||
                 n.name.toLowerCase().includes(q) ||
@@ -404,14 +426,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const showAllCheckbox = document.getElementById('showAllCheckbox');
     if (showAllCheckbox) {
         showAllCheckbox.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                renderAllNatives();
-            } else {
-                renderNamespaces();
-            }
+            localStorage.setItem('showAll', e.target.checked);
+            window.location.reload();
         });
     }
 
+    if (redhookToggle) {
+        redhookToggle.addEventListener('change', () => {
+            localStorage.setItem('showRedhook', redhookToggle.checked);
+            window.location.reload();
+        });
+    }
 
     if (modalClose) {
         modalClose.addEventListener('click', () => window.closeModal());
@@ -476,6 +501,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function applyRedhookToggleState() {
+        if (redhookToggle) {
+            const showRedhook = localStorage.getItem('showRedhook') !== 'false';
+            redhookToggle.checked = showRedhook;
+        }
+    }
+
+    function applyShowAllState() {
+        const showAllCheckbox = document.getElementById('showAllCheckbox');
+        if (showAllCheckbox) {
+            const showAll = localStorage.getItem('showAll') === 'true';
+            showAllCheckbox.checked = showAll;
+        }
+    }
+
     if (themeSwitch) themeSwitch.addEventListener('change', (e) => {
         const newTheme = e.target.checked ? 'light' : 'dark';
         localStorage.setItem('theme', newTheme);
@@ -483,6 +523,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     applyTheme(localStorage.getItem('theme') || 'dark');
+    applyRedhookToggleState();
+    applyShowAllState();
     createCreditsModal();
     load();
 });
