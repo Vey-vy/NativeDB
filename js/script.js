@@ -25,9 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalClose = document.getElementById('modalClose');
 
     const themeSwitch = document.getElementById('themeSwitch');
-    const creditsModal = document.getElementById('creditsModal');
-    const creditsBtn = document.getElementById('creditsBtn');
-    const creditsModalClose = document.getElementById('creditsModalClose');
 
     let nativesMap = {};
     let currentNS = null;
@@ -145,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             renderNamespaces();
         } catch (e) {
-            namespacesEl.innerHTML = `<div style="color:orange">Erreur: ${escapeHtml(e.message)}</div>`;
+            namespacesEl.innerHTML = `<div style="color:orange">Error: ${escapeHtml(e.message)}</div>`;
             panelContent.innerHTML = `<div style="color:var(--muted)">Could not load natives file — check your connection or open the raw file directly.</div>`;
         }
     }
@@ -423,22 +420,51 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.addEventListener('click', (e) => { if (e.target === modal) window.closeModal(); });
     }
 
-    if (creditsBtn && creditsModal) {
+    // --- Dynamic Credits Modal ---
+    function createCreditsModal() {
+        const creditsBtn = document.getElementById('creditsBtn');
+        if (!creditsBtn) return;
+
+        const creditSource = isRDR
+            ? { name: 'K3rhos', url: 'https://k3rhos.me/' }
+            : { name: 'Alloc8or', url: 'https://alloc8or.re/' };
+
+        const modalHTML = `
+        <div id="creditsModal" class="modal" aria-hidden="true">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div style="font-weight:800;color:var(--accent)">Credits</div>
+                    <div>
+                        <button class="close" id="creditsModalClose" title="Close">✕</button>
+                    </div>
+                </div>
+                <div style="margin-top:14px;color:var(--muted);">
+                    <ul style="list-style:none;padding-left:10px;">
+                        <li>- Vey</li>
+                        <li>- <a href="${creditSource.url}" target="_blank" class="credit-link">${creditSource.name} (for data)</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        const creditsModal = document.getElementById('creditsModal');
+        const creditsModalClose = document.getElementById('creditsModalClose');
+
         creditsBtn.addEventListener('click', () => {
             creditsModal.classList.add('open');
             creditsModal.setAttribute('aria-hidden', 'false');
         });
-    }
 
-    const closeCreditsModal = () => {
-        if (creditsModal) {
+        const closeCreditsModal = () => {
             creditsModal.classList.remove('open');
             creditsModal.setAttribute('aria-hidden', 'true');
-        }
-    };
+        };
 
-    if (creditsModalClose) creditsModalClose.addEventListener('click', closeCreditsModal);
-    if (creditsModal) creditsModal.addEventListener('click', (e) => { if (e.target === creditsModal) closeCreditsModal(); });
+        creditsModalClose.addEventListener('click', closeCreditsModal);
+        creditsModal.addEventListener('click', (e) => { if (e.target === creditsModal) closeCreditsModal(); });
+    }
 
     function applyTheme(theme) {
         if (theme === 'light') {
@@ -457,5 +483,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     applyTheme(localStorage.getItem('theme') || 'dark'); // Apply theme on load
+    createCreditsModal(); // Create and setup the credits modal
     load(); // Initial data load and rendering
 });

@@ -1,10 +1,18 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Vey - RDR Natives</title>
+
+    <!-- Meta tags for Discord/Social Media Embeds -->
+    <meta property="og:title" content="RDR Natives - Vey Site">
+    <meta property="og:description" content="Explore the complete native database for Red Dead Redemption (PC). Search, view parameters, hashes, and descriptions.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://votresite.com/rdr_native/">
+    <meta name="theme-color" content="#4de5b6">
+
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="stylesheet" href="../css/style.css">
 </head>
@@ -52,7 +60,7 @@
                         Open raw
                     </a>
                 </div>
-                <a href="./generate.html" class="btn-secondary"
+                <a href="./generate/" class="btn-secondary"
                     style="width:100%; text-decoration: none; text-align: center;">Generate</a>
                 <button class="btn-secondary" id="creditsBtn" style="width:100%;">Credits</button>
             </div>
@@ -125,21 +133,5 @@
 
     <div id="notification-container"></div>
     <script src="../js/script.js"></script>
-    <div id="creditsModal" class="modal" aria-hidden="true">
-        <div class="modal-card">
-            <div class="modal-header">
-                <div style="font-weight:800;color:var(--accent)">Credits</div>
-                <div>
-                    <button class="close" id="creditsModalClose" title="Close">✕</button>
-                </div>
-            </div>
-            <div style="margin-top:14px;color:var(--muted);">
-                <ul style="list-style:none;padding-left:10px;">
-                    <li>- Vey</li>
-                    <li>- <a href="https://k3rhos.me/" target="_blank" class="credit-link">K3rhos (for data)</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
