@@ -16,16 +16,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let catalogData = {};
     let itemsByCategory = {};
-    let itemsByKey = {}; // For quick lookups
+    let itemsByKey = {};
     let currentCategory = null;
 
     function escapeHtml(s) { return String(s || '').replace(/[&<>()"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '(': '&#40;', ')': '&#41;', '"': '&quot;', "'": '&#39;' }[c])); }
     function escapeForJs(s) { return (s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\"').replace(/\n/g, '\\n'); }
 
+    const keyPrefixToCategory = {
+        'VEM_': 'CATEGORY_VEHICLE_MOD',
+        'VE_': 'CATEGORY_VEHICLE',
+        'WP_': 'CATEGORY_WEAPON',
+        'F_': 'CATEGORY_CLOTH',
+        'M_': 'CATEGORY_CLOTH',
+        'SERVICE_': 'CATEGORY_SERVICE',
+        'DEC_': 'CATEGORY_DECORATION',
+        'PR_': 'CATEGORY_PROPERTY_INTERIOR',
+        'VEU_': 'CATEGORY_VEHICLE_UPGRADE',
+    };
+
     function normItem(item) {
-        // If the key is a number, format it as a hex string for better readability
         if (typeof item.key === 'number') {
             item.key = `0x${item.key.toString(16).toUpperCase()}`;
+        }
+
+        if (!item.category && typeof item.key === 'string') {
+            for (const prefix in keyPrefixToCategory) {
+                if (item.key.startsWith(prefix)) {
+                    item.category = [keyPrefixToCategory[prefix]];
+                    break;
+                }
+            }
         }
         return item;
     }
@@ -242,8 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('open');
         modal.setAttribute('aria-hidden', 'true');
     }
-
-    // --- Event Listeners ---
 
     globalSearch.addEventListener('input', () => {
         const q = globalSearch.value.toLowerCase();

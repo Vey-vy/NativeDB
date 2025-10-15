@@ -482,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyTheme(newTheme);
     });
 
-    applyTheme(localStorage.getItem('theme') || 'dark'); // Apply theme on load
-    createCreditsModal(); // Create and setup the credits modal
-    load(); // Initial data load and rendering
+    applyTheme(localStorage.getItem('theme') || 'dark');
+    createCreditsModal();
+    load();
 });

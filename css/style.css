@@ -202,7 +202,6 @@ body.light-theme .btn {
     color: var(--accent);
 }
 
-/* Custom scrollbar */
 .sidebar-content::-webkit-scrollbar,
 .panel::-webkit-scrollbar {
     width: 8px;
@@ -312,7 +311,7 @@ body.light-theme .btn {
     opacity: 1;
     transition: transform .3s cubic-bezier(.2, .9, .25, 1), opacity .3s ease, background .2s;
     cursor: pointer;
-    margin-bottom: 10px; /* Added space between native rows */
+    margin-bottom: 10px;
 }
 
 .native-row:hover {
@@ -508,7 +507,6 @@ body.light-theme pre.code {
     color: var(--accent2);
 }
 
-/* Modal Animation */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -560,7 +558,6 @@ body.light-theme pre.code {
     opacity: 1;
 }
 
-/* Generate page checkbox list */
 .checkbox-list {
     list-style: none;
     padding: 0;
@@ -578,7 +575,6 @@ body.light-theme pre.code {
     page-break-inside: avoid;
 }
 
-/* Custom Checkbox */
 .custom-checkbox {
     display: flex;
     align-items: center;
@@ -608,7 +604,6 @@ body.light-theme pre.code {
     background-color: var(--accent);
 }
 
-/* New Theme Switcher with icons */
 .switch-container {
     display: flex;
     align-items: center;
@@ -749,7 +744,6 @@ body.light-theme .notification {
     border-left-color: var(--accent2);
 }
 
-/* Styles for global search results separator */
 .search-namespace-separator {
     margin-top: 20px;
     margin-bottom: 10px;
@@ -761,5 +755,5 @@ body.light-theme .notification {
     margin: 0;
     font-size: 16px;
     color: var(--accent);
-    text-align: left; /* Ensure text aligns left */
+    text-align: left;
 }
